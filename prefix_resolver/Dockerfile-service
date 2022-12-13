@@ -1,0 +1,10 @@
+FROM python:3.10-bullseye
+
+# RUN apt-get update && apt-get install -y ...
+# RUN pip install --no-cache-dir ...
+
+WORKDIR /testwork
+ADD routes.txt /testwork/routes.txt
+ADD service/ /testwork/service
+
+CMD ["python3", "-m", "service"]
