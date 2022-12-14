@@ -1,0 +1,37 @@
+version: "3.8"
+services:
+  db:
+    container_name: db
+    image: postgres:13.0-alpine
+    volumes:
+      - /var/lib/postgresql/data/
+    env_file:
+      - ./.env
+  web:
+    container_name: web
+    image: "sony-nre-testwork-testservice"
+    build: ../prefix_resolver/
+    restart: always
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+    links:
+      - db
+  nginx:
+    container_name: nginx
+    image: nginx:1.21.3-alpine
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    links:
+      - web
+  testrunner:
+    container_name: testrunner
+    image: "sony-nre-testwork-testrunner"
+    build:
+      context: ../
+      dockerfile: Dockerfile-testrunner
+    command: ["./wait-for-it.sh", "web:8000", "--timeout=300", "--strict", "--", "pytest", "-v"]

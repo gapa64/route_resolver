@@ -1,0 +1,9 @@
+FROM python:3.10-bullseye
+
+RUN pip install --no-cache-dir pytest requests
+
+WORKDIR /testwork
+ADD test/ /testwork/test
+COPY ./infra/wait-for-it.sh ./
+RUN chmod +x wait-for-it.sh
+CMD ["pytest", "-v"]

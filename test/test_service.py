@@ -1,8 +1,8 @@
 from requests import request
 from time import sleep
 
-HOSTNAME = "web"
-PORT = 8000
+HOSTNAME = "nginx"
+PORT = 80
 API_URL = f"http://{HOSTNAME}:{PORT}"
 
 
