@@ -3,6 +3,8 @@
 CONTAINER_FIRST_STARTUP="CONTAINER_FIRST_STARTUP"
 if [ ! -e /$CONTAINER_FIRST_STARTUP ]; then
     touch /$CONTAINER_FIRST_STARTUP
+    echo "waiting for DB ready for 10 seconds"
+    sleep 10
     echo "Preparing Migrations migrations"
     python3 manage.py makemigrations
     echo "Runing migrations"
