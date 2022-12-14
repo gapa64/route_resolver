@@ -9,8 +9,8 @@ services:
       - ./.env
   web:
     container_name: web
-    image: "sony-nre-testwork-testservice"
     build: ../prefix_resolver/
+    image: "sony-nre-testwork-testservice"
     restart: always
     ports:
       - "8000:8000"

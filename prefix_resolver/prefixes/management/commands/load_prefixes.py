@@ -39,8 +39,6 @@ class Command(BaseCommand):
                 wrong_entries.append(row)
         self.grace_bulk_insert(ipv4_bulk, IPv4prefix)
         self.grace_bulk_insert(ipv6_bulk, IPv6prefix)
-        #IPv4prefix.objects.bulk_create(ipv4_bulk)
-        #IPv6prefix.objects.bulk_create(ipv6_bulk)
         if len(wrong_entries) != 0:
             self.print_wrong(wrong_entries)
 
@@ -57,7 +55,7 @@ class Command(BaseCommand):
             print('Inserting {}/{} of entries'.format(str(i), str(total_size)))
             model.objects.bulk_create(bulk[start:i])
             start = i
-        print('Inserting {}/{} of entries'.format(str(i), str(total_size)))
+        print('Inserting {}/{} of entries'.format(str(start), str(total_size)))
         model.objects.bulk_create(bulk[start:])
 
     def print_wrong(self, wrong_entries):
