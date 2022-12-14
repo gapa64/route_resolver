@@ -18,12 +18,12 @@ class Command(BaseCommand):
                             type=str,
                             help='specify file to load')
 
-
     def handle(self, *args, **kwargs):
         ipv4_bulk = []
         ipv6_bulk = []
         wrong_entries = []
         file_path = kwargs['file_path']
+        print('Parsing routes')
         with open(file_path) as raw_file:
             for row in raw_file:
                 parsed_entry = self.IPv4_ROUTE_PATTERN.search(row)
@@ -37,16 +37,28 @@ class Command(BaseCommand):
                     ipv6_bulk.append(v6_entry)
                     continue
                 wrong_entries.append(row)
-        IPv4prefix.objects.bulk_create(ipv4_bulk)
-        IPv6prefix.objects.bulk_create(ipv6_bulk)
+        self.grace_bulk_insert(ipv4_bulk, IPv4prefix)
+        self.grace_bulk_insert(ipv6_bulk, IPv6prefix)
+        #IPv4prefix.objects.bulk_create(ipv4_bulk)
+        #IPv6prefix.objects.bulk_create(ipv6_bulk)
         if len(wrong_entries) != 0:
             self.print_wrong(wrong_entries)
-
 
     def create_object(self, parsed_entry, model):
         prefix = parsed_entry.group('prefix')
         nexthop = parsed_entry.group('nexthop')
         return model(prefix=prefix, nexthop=nexthop)
+
+    def grace_bulk_insert(self, bulk, model, chunk_size=5000):
+        total_size = len(bulk)
+        print('total {} entries of {} to insert'.format(str(total_size), model))
+        start = 0
+        for i in range(total_size, chunk_size):
+            print('Inserting {}/{} of entries'.format(str(i), str(total_size)))
+            model.objects.bulk_create(bulk[start:i])
+            start = i
+        print('Inserting {}/{} of entries'.format(str(i), str(total_size)))
+        model.objects.bulk_create(bulk[start:])
 
     def print_wrong(self, wrong_entries):
         print('The following entriees not loaded int DB')
