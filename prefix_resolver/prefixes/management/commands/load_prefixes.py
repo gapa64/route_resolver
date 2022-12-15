@@ -40,6 +40,9 @@ class Command(BaseCommand):
                         continue
                     data['model'].objects.bulk_create(bulks[family])
                     bulks[family] = []
+            for family, data in self.FAMILIES.items():
+                if len(bulks[family]) > 0:
+                    data['model'].objects.bulk_create(bulks[family])
 
     def create_object(self, parsed_entry, model):
         prefix = parsed_entry.group('prefix')
