@@ -4,11 +4,14 @@ from rest_framework.decorators import APIView
 from rest_framework.response import Response
 
 from prefixes.models import IPv4prefix, IPv6prefix
+from .serializers import (IPv4DestinationSerializer,
+                          IPv6DestinationSerializer)
 
 
 class APIDestination(APIView):
 
     model = None
+    serializer = None
 
     def get(self, request, ip):
         best_path = self.model.objects.extra(
@@ -17,15 +20,14 @@ class APIDestination(APIView):
         ).order_by('-prefix', 'metric', 'nexthop').first()
         if best_path is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        content = {'dst': best_path.prefix,
-                   'nh': best_path.nexthop}
-        return Response(content, status=status.HTTP_200_OK)
+        destination_serializer = self.serializer(best_path)
+        return Response(destination_serializer.data,
+                        status=status.HTTP_200_OK)
 
 
 class APIPrefixUpdate(APIView):
 
     model = None
-    route_table = None
 
     def put(self, request, prefix, nexthop,
             metric, classifier=None):
@@ -51,11 +53,13 @@ class APIPrefixUpdate(APIView):
 class APIDestinationIPv4(APIDestination):
 
     model = IPv4prefix
+    serializer = IPv4DestinationSerializer
 
 
 class APIDestinationIPv6(APIDestination):
 
     model = IPv6prefix
+    serializer = IPv6DestinationSerializer
 
 
 class APIPrefixIPv4(APIPrefixUpdate):
